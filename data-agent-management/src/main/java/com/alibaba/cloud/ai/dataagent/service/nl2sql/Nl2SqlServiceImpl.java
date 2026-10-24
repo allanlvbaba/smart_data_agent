@@ -76,7 +76,8 @@ public class Nl2SqlServiceImpl implements Nl2SqlService {
 			log.debug("Generating new SQL from scratch");
 			String prompt = PromptHelper.buildNewSqlGeneratorPrompt(sqlGenerationDTO);
 			log.debug("New SQL generator prompt as follows \n {} \n", prompt);
-			newSqlFlux = llmService.toStringFlux(llmService.callSystem(prompt));
+			// 部分厂商（如智谱）要求 messages 中必须包含 user 消息，仅 system 会返回 400/1214，故补一条简短 user 消息
+			newSqlFlux = llmService.toStringFlux(llmService.call(prompt, "请根据系统指令生成 SQL。"));
 			log.info("New SQL generation completed");
 		}
 

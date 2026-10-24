@@ -84,7 +84,8 @@ public class PythonAnalyzeNode implements NodeAction {
 		String systemPrompt = PromptConstant.getPythonAnalyzePromptTemplate()
 			.render(Map.of("python_output", pythonOutput, "user_query", userQuery));
 
-		Flux<ChatResponse> pythonAnalyzeFlux = llmService.callSystem(systemPrompt);
+		// 部分厂商（如智谱）要求 messages 中必须包含 user 消息，仅 system 会返回 400/1214，故补一条简短 user 消息
+		Flux<ChatResponse> pythonAnalyzeFlux = llmService.call(systemPrompt, "请根据系统指令分析以上执行结果。");
 
 		Flux<GraphResponse<StreamingOutput>> generator = FluxUtil.createStreamingGeneratorWithMessages(this.getClass(),
 				state, "正在分析代码运行结果...\n", "\n结果分析完成。", aiResponse -> {
