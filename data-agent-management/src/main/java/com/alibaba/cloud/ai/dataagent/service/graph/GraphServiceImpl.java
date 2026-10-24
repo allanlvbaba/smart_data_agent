@@ -283,6 +283,10 @@ public class GraphServiceImpl implements GraphService {
 		String agentId = request.getAgentId();
 		String threadId = request.getThreadId();
 		log.error("Error in stream processing for threadId: {}: ", threadId, error);
+		// 临时诊断：输出上游 LLM 厂商返回的错误响应体（含官方错误码），定位 400/401 等根因后可移除
+		if (error instanceof org.springframework.web.reactive.function.client.WebClientResponseException wcRe) {
+			log.error("Upstream error response body: {}", wcRe.getResponseBodyAsString());
+		}
 		StreamContext context = streamContextMap.remove(threadId);
 		multiTurnContextManager.discardPending(request.getConversationId());
 		releaseCheckpoint(RunnableConfig.builder().threadId(threadId).build());
